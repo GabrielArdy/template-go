@@ -1,0 +1,12 @@
+app:
+  name: 'Data Crawler'
+  version: '1.0.0'
+  description: 'A simple data crawler API'
+server:
+  port: 8181
+mongodb:
+    host: localhost
+    port: 27017
+    database: DataCrawler
+    username: root
+    password: rootpassword

@@ -1,3 +1,23 @@
-/docker
-/repository
-/services
+# Directories
+/docker/
+internal/repository/*
+internal/services/*
+
+# Go specific
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# IDE specific
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment files
+.env
+.env.local

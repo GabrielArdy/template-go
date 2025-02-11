@@ -10,3 +10,5 @@ mongodb:
     database: DataCrawler
     username: root
     password: rootpassword
+serviceAccount:
+    path: ./resources/go-absen-backend-firebase-adminsdk-fbsvc-8665bd3219.json

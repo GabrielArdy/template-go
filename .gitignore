@@ -2,6 +2,7 @@
 /docker/
 /internal/repository/*
 /internal/services/*
+/resources/
 
 # Go specific
 *.exe

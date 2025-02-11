@@ -1,11 +1,16 @@
 package config
 
-import "go.mongodb.org/mongo-driver/mongo"
+import (
+	"cloud.google.com/go/firestore"
+	"firebase.google.com/go/auth"
+	"go.mongodb.org/mongo-driver/mongo"
+)
 
 type Config struct {
-	App     App     `mapstructure:"app"`
-	Server  Server  `mapstructure:"server"`
-	MongoDB MongoDB `mapstructure:"mongodb"`
+	App            App            `mapstructure:"app"`
+	Server         Server         `mapstructure:"server"`
+	ServiceAccount ServiceAccount `mapstructure:"serviceAccount"`
+	MongoDB        MongoDB        `mapstructure:"mongodb"`
 }
 
 type App struct {
@@ -26,6 +31,12 @@ type MongoDB struct {
 	Database string `mapstructure:"database"`
 }
 
+type ServiceAccount struct {
+	Path string `mapstructure:"path"`
+}
+
 type Clients struct {
-	MongoDB *mongo.Database
+	MongoDB      *mongo.Database
+	Firestore    *firestore.Client
+	FirebaseAuth *auth.Client
 }

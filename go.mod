@@ -7,15 +7,12 @@ toolchain go1.23.6
 require (
 	cloud.google.com/go/firestore v1.15.0
 	firebase.google.com/go v3.13.0+incompatible
-	github.com/dotse/go-health v0.2.6
 	github.com/getkin/kin-openapi v0.129.0
-	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/labstack/echo-contrib v0.17.2
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/spf13/viper v1.19.0
 	github.com/swaggo/echo-swagger v1.4.1
 	go.mongodb.org/mongo-driver v1.17.2
-	golang.org/x/crypto v0.32.0
 	google.golang.org/api v0.171.0
 )
 
@@ -83,6 +80,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.33.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
+	golang.org/x/crypto v0.32.0 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/oauth2 v0.23.0 // indirect

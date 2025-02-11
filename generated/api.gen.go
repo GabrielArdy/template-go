@@ -11,74 +11,16 @@ import (
 	"net/url"
 	"path"
 	"strings"
-	"time"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/labstack/echo/v4"
 )
 
-// CrawlRequest defines model for CrawlRequest.
-type CrawlRequest struct {
-	// Depth Depth of the crawl
-	Depth int `json:"depth"`
-
-	// Url URL to crawl
-	Url string `json:"url"`
-}
-
-// CrawlResponse defines model for CrawlResponse.
-type CrawlResponse struct {
-	// Content Content of the page
-	Content string `json:"content"`
-
-	// CrawledAt Date and time when the page was crawled
-	CrawledAt time.Time `json:"crawledAt"`
-
-	// Links List of links on the page
-	Links []string `json:"links"`
-
-	// Title Title of the page
-	Title string `json:"title"`
-
-	// Url URL of the crawled page
-	Url string `json:"url"`
-}
-
-// RegisterUserRequest defines model for RegisterUserRequest.
-type RegisterUserRequest struct {
-	// Email Email of the user
-	Email string `json:"email"`
-
-	// FirstName First name of the user
-	FirstName string `json:"firstName"`
-
-	// LastName Last name of the user
-	LastName string `json:"lastName"`
-
-	// Password Password of the user
-	Password string `json:"password"`
-
-	// Phone Phone number of the user
-	Phone string `json:"phone"`
-
-	// Username Username of the user
-	Username string `json:"username"`
-}
-
-// PostApiAuthRegisterJSONRequestBody defines body for PostApiAuthRegister for application/json ContentType.
-type PostApiAuthRegisterJSONRequestBody = RegisterUserRequest
-
-// PostApiCrawlJSONRequestBody defines body for PostApiCrawl for application/json ContentType.
-type PostApiCrawlJSONRequestBody = CrawlRequest
-
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-	// Register a new user
-	// (POST /api/auth/register)
-	PostApiAuthRegister(ctx echo.Context) error
-	// Crawl data from a website
-	// (POST /api/crawl)
-	PostApiCrawl(ctx echo.Context) error
+	// Health check
+	// (GET /api/actuator/health)
+	GetApiActuatorHealth(ctx echo.Context) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -86,21 +28,12 @@ type ServerInterfaceWrapper struct {
 	Handler ServerInterface
 }
 
-// PostApiAuthRegister converts echo context to params.
-func (w *ServerInterfaceWrapper) PostApiAuthRegister(ctx echo.Context) error {
+// GetApiActuatorHealth converts echo context to params.
+func (w *ServerInterfaceWrapper) GetApiActuatorHealth(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PostApiAuthRegister(ctx)
-	return err
-}
-
-// PostApiCrawl converts echo context to params.
-func (w *ServerInterfaceWrapper) PostApiCrawl(ctx echo.Context) error {
-	var err error
-
-	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PostApiCrawl(ctx)
+	err = w.Handler.GetApiActuatorHealth(ctx)
 	return err
 }
 
@@ -132,29 +65,19 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
-	router.POST(baseURL+"/api/auth/register", wrapper.PostApiAuthRegister)
-	router.POST(baseURL+"/api/crawl", wrapper.PostApiCrawl)
+	router.GET(baseURL+"/api/actuator/health", wrapper.GetApiActuatorHealth)
 
 }
 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/7RWTW/cNhD9K8S0R2Ulb5LW1amO7QJu3TZw7UuNoBhLsxZdiWTIkbeLYP97QYqr7EYU",
-	"3BoxoAM1JB/fm3n8+ASV7oxWpNhB+Qlc1VCHoXlqcd1e0ceeHPt/Y7Uhy5JCb02Gm6HhKisNS62ghDMf",
-	"FnoluCFReQTIgP7BzrQE5TID3hiCEqRiuicL2wx6205xbq4uBespAjTMxpV5HiOLSncwojq2Ut3DdpuB",
-	"pY+9tFRDeRtWyCLjD+NgffdAFXsGUakzWjmaSq20YlI8JXk6dOzkGrynA67XjXRCOoFKxGAYs5gSziAo",
-	"pfokscwZMglUtWDZkVg3pMblxBqdiFMPll4Wy6NXhf+ui6IM35+QwUrbDhlKqJHplcdLcWml+ttNeVxK",
-	"F7SGbqFVUvRtqkI53umeIUv2+fRixb4ykqkLC08oxQBai5vwL7mlKcVrH56tx3kswpnuUKqU8lkv7jua",
-	"6in08205KNklPRvdtm+JlGmv6F46JnvjyM7uUupQJhSd+/BOU+/IHmiJrR/D5LSSDFbSOv4Nu0QRfvJd",
-	"QmFHs0v8rJtk/lucA73EpzDPdNLMBp1ba1tPId/HnlnEcWoKttEqQfO9DwvVd3dk53CPlq/fvP3u++Mf",
-	"ipQDHVmVzMBN7Jml+6Ab9VedysKXxtutkUWDZPtSP1d2rx47wVMnenCpVtoTbmVF8QgdNMCvF9d72xWY",
-	"OtMie7xHsm4QdrQoFoUfpQ0pNBJKeB1CnhY3wcg5Gpljz01uo++D2fVgem959Gm6qH0NtOMTI096bnab",
-	"BIYEkON3ut58caijMa2swvz8wXlKu3vQt761tIISvsk/X5R5vCXz1B7cHmabbU8hMNwuQcyyKP4XhcM9",
-	"3ZFz/vjx23usvWcgdqmhWri+qsi5Vd+2m6QfElU8tNvvv/iSvPn6VC/UI7ayFrEgz2P3DmsxZjyDty9B",
-	"k/0uaYUj+0hWkLXaPo/sCPXHAHUeoPw413cd2g2U43EuUChaD5vbjwjGH55BTxn+ND6WXsLpB4/BF7D4",
-	"f1g7Ps9mrHqQzDBD1MgoVlZ3AsWa7pzkOHuoqIPydnLL6GqsOMTnQLjbyzxvfV+jHZfHxbE/ryZnv9V1",
-	"X/mfFIJ/HaCRi/2nz+MRbD9s/w0AAP//wrMyloQLAAA=",
+	"H4sIAAAAAAAC/2xRwW7VMBD8lWjO0UsKl8q3nqACRCXghDgYv23jYntX9uaJKsq/o3UqJJ44eTyend3x",
+	"bgichQsVbXDbPiKWR4bbkGKg0shg8Zng8On+K/YRGjXZVSlL8koYcaHaIhc43Jzm02wqFipeIhzedmqE",
+	"eF2sByYvcfJBV69cp4V80sX4J1I7WKh6jVzuz3B4R3on8e5V/f4Qj6jUhEujbvhmnu0IXJRK9/AiKYbu",
+	"Mj03m2xDCwtlb0iq9dB4VDf1unZ0phZqFD2ifOn8wI+DLjQ0qpcYLCz99ln6D3x7wAh9EcNNayxP2Pe/",
+	"DP98pqDYjfrX+fOHrmtrzr6+wOGINYSFwq+jwNpRbXDfr8f6yMGn4XjHiLUmOCyq4qYp2dvCTd3tfGtr",
+	"uC5+qHxeg13+59DcZLs5vSY8Bc7T5Qb7j/1PAAAA//+KlD0TJwIAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -7,8 +7,6 @@ import (
 	"go-scratch/config"
 	"go-scratch/generated"
 	"go-scratch/internal/handler"
-	"go-scratch/internal/repository"
-	"go-scratch/internal/services"
 	"log/slog"
 	"net/http"
 	"os"
@@ -21,12 +19,7 @@ func main() {
 	config.Load(ctx)
 	e := config.LoadEcho()
 
-	crawlerRepo := repository.NewCrawlerRepository(config.Cli.MongoDB, "DocsCrawler")
-	crawlerService := services.NewCrawlerService(crawlerRepo)
-	authRepo := repository.NewUserAuthRepository(config.Cli.MongoDB, "UserAuth")
-	userRepo := repository.NewUserRepository(config.Cli.MongoDB, "User")
-	authService := services.NewUserAuthService(authRepo, userRepo)
-	var server generated.ServerInterface = handler.NewHandler(crawlerService, authService)
+	var server generated.ServerInterface = handler.NewHandler()
 	generated.RegisterHandlers(e, server)
 
 	go func() {

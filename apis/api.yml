@@ -12,15 +12,9 @@ servers:
   - url: https://api.example.com/v1
     description: Production server
 paths:
-  /api/auth/register:
-    post:
-      summary: Register a new user
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RegisterUserRequest'
+  /api/actuator/health:
+    get:
+      summary: Health check
       responses:
         '200':
           description: OK
@@ -29,124 +23,23 @@ paths:
               schema:
                 type: object
                 properties:
-                  message:
+                  status:
                     type: string
-                    example: User registered successfully
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Invalid request
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Internal server error
-  /api/crawl:
-    post:
-      summary: Crawl data from a website
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CrawlRequest'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CrawlResponse'
+                    description: Status of the service
+                    example: UP
 components:
   schemas:
-    RegisterUserRequest:
+    Error:
       type: object
       properties:
-        username:
-          type: string
-          description: Username of the user
-          example: john_doe
-        email:
-          type: string
-          description: Email of the user
-          example: example@email.com
-        password:
-          type: string
-          description: Password of the user
-          example: password
-        firstName:
-          type: string
-          description: First name of the user
-          example: John
-        lastName:
-          type: string
-          description: Last name of the user
-          example: Doe
-        phone:
-          type: string
-          description: Phone number of the user
-          example: 1234567890
-      required:
-        - username
-        - email
-        - password
-        - firstName
-        - lastName
-        - phone
-    CrawlRequest:
-      type: object
-      properties:
-        url:
-          type: string
-          description: URL to crawl
-          example: https://example.com
-        depth:
+        code:
           type: integer
-          description: Depth of the crawl
-          example: 2
-      required:
-        - url
-        - depth
-    CrawlResponse:
-      type: object
-      properties:
-        url:
+          format: int32
+          description: Error code
+        message:
           type: string
-          description: URL of the crawled page
-          example: https://example.com
-        title:
+          description: Error message
+        fields:
           type: string
-          description: Title of the page
-          example: Example Domain
-        links:
-          type: array
-          items:
-            type: string
-          description: List of links on the page
-          example: ["https://example.com/about", "https://example.com/contact"]
-        content:
-          type: string
-          description: Content of the page
-          example: "This is an example page."
-        crawledAt:
-          type: string
-          format: date-time
-          description: Date and time when the page was crawled
-          example: "2021-01-01T00:00:00Z"
-      required:
-        - url
-        - title
-        - links
-        - content
-        - crawledAt
+          description: Fields with errors
+        

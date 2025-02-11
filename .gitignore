@@ -1,7 +1,7 @@
 # Directories
 /docker/
-internal/repository/*
-internal/services/*
+/internal/repository/*
+/internal/services/*
 
 # Go specific
 *.exe

@@ -14,6 +14,8 @@ import (
 type UserAuthRepository interface {
 	InsertOne(ctx context.Context, userAuth repository.UserAuth) error
 	FindOne(ctx context.Context, email string) (repository.UserAuth, error)
+	UpdateRefreshToken(ctx context.Context, email, refreshToken string) error
+	UpdateAccessToken(ctx context.Context, email, accessToken string) error
 }
 
 type UserRepository interface {
@@ -104,32 +106,41 @@ func (s *UserAuthService) Register(ctx context.Context, user generated.RegisterU
 
 }
 
-func (s *UserAuthService) Login(ctx context.Context, email, password string) (repository.UserAuth, error) {
+func (s *UserAuthService) Login(ctx context.Context, email string, password string) (string, string, error) {
 	userAuth, err := s.uarp.FindOne(ctx, email)
 	if err != nil {
 		slog.Error("Error finding user auth: %v", slog.Any("error", err.Error()))
-		return repository.UserAuth{}, err
+		return "", "", err
 	}
 
 	if !commons.CheckPasswordHash(userAuth.Password, password) {
-		slog.Error("Invalid password for user: %v", slog.Any("email", email))
-		return repository.UserAuth{}, commons.ErrInvalidCredentials
+		slog.Error("Invalid password for user: %v", slog.Any("user", email))
+		return "", "", commons.ErrInvalidCredentials
 	}
 
-	accesstoken, err := commons.Decrypt(userAuth.AccessToken)
+	accessToken, err := commons.Decrypt(userAuth.AccessToken)
 	if err != nil {
 		slog.Error("Error decrypting access token: %v", slog.Any("error", err.Error()))
-		return repository.UserAuth{}, err
+		return "", "", err
 	}
 
 	refreshToken, err := commons.Decrypt(userAuth.RefreshToken)
 	if err != nil {
 		slog.Error("Error decrypting refresh token: %v", slog.Any("error", err.Error()))
-		return repository.UserAuth{}, err
+		return "", "", err
 	}
 
-	userAuth.AccessToken = accesstoken
-	userAuth.RefreshToken = refreshToken
+	err = s.uarp.UpdateRefreshToken(ctx, email, refreshToken)
+	if err != nil {
+		slog.Error("Error updating refresh token: %v", slog.Any("error", err.Error()))
+		return "", "", err
+	}
 
-	return userAuth, nil
+	err = s.uarp.UpdateAccessToken(ctx, email, accessToken)
+	if err != nil {
+		slog.Error("Error updating access token: %v", slog.Any("error", err.Error()))
+		return "", "", err
+	}
+
+	return accessToken, refreshToken, nil
 }

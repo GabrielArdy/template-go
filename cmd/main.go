@@ -7,6 +7,8 @@ import (
 	"go-scratch/config"
 	"go-scratch/generated"
 	"go-scratch/internal/handler"
+	"go-scratch/internal/repository"
+	"go-scratch/internal/services"
 	"log/slog"
 	"net/http"
 	"os"
@@ -19,7 +21,10 @@ func main() {
 	config.Load(ctx)
 	e := config.LoadEcho()
 
-	var server generated.ServerInterface = handler.NewHandler()
+	ar := repository.NewAuthRepository(config.Cli.MongoDB, "auth")
+	ur := repository.NewUserRepository(config.Cli.MongoDB, "users")
+	uas := services.NewUserAuthService(ur, ar, config.Cli.Redis)
+	var server generated.ServerInterface = handler.NewHandler(uas)
 	generated.RegisterHandlers(e, server)
 
 	go func() {

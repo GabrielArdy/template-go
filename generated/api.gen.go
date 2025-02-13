@@ -14,13 +14,95 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/labstack/echo/v4"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 )
+
+// Error defines model for Error.
+type Error struct {
+	// Code Error code
+	Code int32 `json:"code"`
+
+	// Fields Fields with errors
+	Fields string `json:"fields"`
+
+	// Message Error message
+	Message string `json:"message"`
+}
+
+// Success defines model for Success.
+type Success struct {
+	// Code Success code
+	Code int32 `json:"code"`
+
+	// Message Success message
+	Message string `json:"message"`
+}
+
+// UserLoginRequest defines model for UserLoginRequest.
+type UserLoginRequest struct {
+	// Password Password
+	Password string `json:"password"`
+
+	// User Teacher ID
+	User string `json:"user"`
+}
+
+// UserLoginResponse defines model for UserLoginResponse.
+type UserLoginResponse struct {
+	// TeacherId Teacher ID
+	TeacherId string `json:"teacherId"`
+
+	// Token JWT token
+	Token string `json:"token"`
+}
+
+// UserSignup defines model for UserSignup.
+type UserSignup struct {
+	// Email Email address
+	Email openapi_types.Email `json:"email"`
+
+	// FirstName First name
+	FirstName string `json:"firstName"`
+
+	// Grade Grade
+	Grade string `json:"grade"`
+
+	// LastName Last name
+	LastName string `json:"lastName"`
+
+	// Password Password
+	Password string `json:"password"`
+
+	// Position Position
+	Position string `json:"position"`
+
+	// Role Role
+	Role string `json:"role"`
+
+	// Status Status
+	Status string `json:"status"`
+
+	// TeacherId Teacher ID
+	TeacherId string `json:"teacherId"`
+}
+
+// PostApiAuthLoginJSONRequestBody defines body for PostApiAuthLogin for application/json ContentType.
+type PostApiAuthLoginJSONRequestBody = UserLoginRequest
+
+// PostApiAuthRegisterJSONRequestBody defines body for PostApiAuthRegister for application/json ContentType.
+type PostApiAuthRegisterJSONRequestBody = UserSignup
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// Health check
 	// (GET /api/actuator/health)
 	GetApiActuatorHealth(ctx echo.Context) error
+	// Login a user
+	// (POST /api/auth/login)
+	PostApiAuthLogin(ctx echo.Context) error
+	// Register a new user
+	// (POST /api/auth/register)
+	PostApiAuthRegister(ctx echo.Context) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -34,6 +116,24 @@ func (w *ServerInterfaceWrapper) GetApiActuatorHealth(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.GetApiActuatorHealth(ctx)
+	return err
+}
+
+// PostApiAuthLogin converts echo context to params.
+func (w *ServerInterfaceWrapper) PostApiAuthLogin(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostApiAuthLogin(ctx)
+	return err
+}
+
+// PostApiAuthRegister converts echo context to params.
+func (w *ServerInterfaceWrapper) PostApiAuthRegister(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostApiAuthRegister(ctx)
 	return err
 }
 
@@ -66,18 +166,30 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	}
 
 	router.GET(baseURL+"/api/actuator/health", wrapper.GetApiActuatorHealth)
+	router.POST(baseURL+"/api/auth/login", wrapper.PostApiAuthLogin)
+	router.POST(baseURL+"/api/auth/register", wrapper.PostApiAuthRegister)
 
 }
 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/2xRwW7VMBD8lWjO0UsKl8q3nqACRCXghDgYv23jYntX9uaJKsq/o3UqJJ44eTyend3x",
-	"bgichQsVbXDbPiKWR4bbkGKg0shg8Zng8On+K/YRGjXZVSlL8koYcaHaIhc43Jzm02wqFipeIhzedmqE",
-	"eF2sByYvcfJBV69cp4V80sX4J1I7WKh6jVzuz3B4R3on8e5V/f4Qj6jUhEujbvhmnu0IXJRK9/AiKYbu",
-	"Mj03m2xDCwtlb0iq9dB4VDf1unZ0phZqFD2ifOn8wI+DLjQ0qpcYLCz99ln6D3x7wAh9EcNNayxP2Pe/",
-	"DP98pqDYjfrX+fOHrmtrzr6+wOGINYSFwq+jwNpRbXDfr8f6yMGn4XjHiLUmOCyq4qYp2dvCTd3tfGtr",
-	"uC5+qHxeg13+59DcZLs5vSY8Bc7T5Qb7j/1PAAAA//+KlD0TJwIAAA==",
+	"H4sIAAAAAAAC/+xWzXLbNhB+FQ7aI0eUfyfhLYljlbJl2ZIct81kOjC4JCGRAAKAlhWP3r0DgLTsEIrt",
+	"tPWpJ4nA/n777S7uEOGV4AyYVii+Q4oUUGH796OUXJo/QnIBUlOwx4SnYH5TUERSoSlnKHbCgb0LUcZl",
+	"hTWKEWV6bxeFSK8EuE/IQaJ1iDIKZaq6do7tebCkugjA2FQbdaUlZbnRrkApnG8No73uaK5DJOFrTSWk",
+	"KP6MmnA34k1UX+4V+fUciDYupzUhoNRz8WjEX4DI1pxaUz+ZlS+ZSwXylOeUTeBrDUp3sxJYqSWXaTec",
+	"8/bGU5dagexqzACTAmSQHD0ZuzUQbrw/EbwSnCnoRq+dxyR9WTAh0nwBrKs0vJoF7ipEcIsrURo1WA2L",
+	"6wGhYzpMLr8lO2c0UQmbHJAPyWGyEL9/+jB824PV8Ft6ldAxTW5H81H/bPbH3vhosUzokl5Xx/rPqRW+",
+	"wYP9fDJ4W5pzfHXcT+b89mz2cXc0Hx2MjpJVdtGbZuXJ7XIynI7g5OR492K2ny3FCIbZ3uH5eHG4Gn76",
+	"C6cXSi0PyJNAt9lskNoG9ZTmrBZdjKHCtPR0oDkOcJpK0y0PmO/kPZhnVCp9hivwTQOpdMDMnUcxl9jX",
+	"egN77JEv8TY/p/gHbp7VChVlp8ByXaD40GeDK+qUOjbaG4+W5KUn2Ik59UgrjXXtGalTd+5j+8+1yXdU",
+	"agsrNmhsSvoA9Yf+2uI9QOY+gSbvLh+NY8oybqItKYGm9W3dYjRKZjYnqm1zaqhEibVxcQNSuax2ev1e",
+	"30hxAQwLimK0Z49M9Lqw4EVY0AgTXWPNZVQALk1R71AOdkyaFsAmYIMaGoB+J+i7Rvo3J2zgcZPJGtzt",
+	"992eYBqYtYGFKCmxVqK5cqxwi7fbZj+uasCzQBcQKJA3lMCj8XR57i2dB9THlscnVk7VVYXlCsXIpRWQ",
+	"AsjCXjmIal1EpZnDNmiuPPCcc2XxqXVhJzZyzAGl3/N09SJUfpWQoRj9Em3eK1HzWIk662z9mKNa1rD+",
+	"h1V5pv9mI22BNUT7/6Jb90DzuHqP00C2UITo4DV8JkyDZLi0VATpHm/fEcliFODAbvnHRJKQU6Xd6+FJ",
+	"Lk1a4f+OTs3We2UitY/M/+njo09b9gAHDJYti4yI1VEo/txZ7Jzc20QhqmWJYlRoLeIoKs1dwZWO3/Tf",
+	"mK3QWc2SpzUxHz4LKo4MfXvNwO0RXkU3O2j9Zf13AAAA//8W6VzJVA0AAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -27,8 +27,133 @@ paths:
                     type: string
                     description: Status of the service
                     example: UP
+  /api/auth/register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSignup'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/auth/login:
+    post:
+      summary: Login a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLoginRequest'
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserLoginResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   schemas:
+    UserSignup:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email address
+        password:
+          type: string
+          description: Password
+          minLength: 6
+        firstName:
+          type: string
+          description: First name
+        lastName:
+          type: string
+          description: Last name
+        teacherId:
+          type: string
+          description: Teacher ID
+        grade:
+          type: string
+          description: Grade
+        position:
+          type: string
+          description: Position
+        status:
+          type: string
+          description: Status
+        role:
+          type: string
+          description: Role
+      required:
+        - email
+        - password
+        - firstName
+        - lastName
+        - teacherId
+        - grade
+        - position
+        - status
+        - role
+    UserLoginRequest:
+      type: object
+      properties:
+        user:
+          type: string
+          description: Teacher ID
+        password:
+          type: string
+          description: Password
+      required:
+        - user
+        - password
+    UserLoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT token
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+        teacherId:
+          type: string
+          description: Teacher ID    
+      required:
+        - token
+        - teacherId
     Error:
       type: object
       properties:
@@ -42,4 +167,21 @@ components:
         fields:
           type: string
           description: Fields with errors
+      required:
+        - code
+        - message
+        - fields
+    Success:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          description: Success code
+        message:
+          type: string
+          description: Success message
+      required:
+        - code
+        - message
         

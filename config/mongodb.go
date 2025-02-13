@@ -8,24 +8,19 @@ import (
 	"os"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func getMongoDBConnectionString() string {
-	connURL := &url.URL{
-		Scheme: "mongodb",
-		User:   url.UserPassword(Conf.MongoDB.User, Conf.MongoDB.Pass),
-		Host:   fmt.Sprintf("%s:%d", Conf.MongoDB.Host, Conf.MongoDB.Port),
-		Path:   Conf.MongoDB.Database,
-	}
-	q := connURL.Query()
-	q.Add("authSource", "admin")
-	q.Add("readPreference", "primary")
-	q.Add("ssl", "false")
-	connURL.RawQuery = q.Encode()
-
-	return connURL.String()
+	// Format: mongodb+srv://<username>:<password>@<cluster>.mongodb.net
+	return fmt.Sprintf("mongodb+srv://%s:%s@%s/%s?retryWrites=true&w=majority",
+		url.QueryEscape(Conf.Atlas.User),
+		url.QueryEscape(Conf.Atlas.Password),
+		Conf.Atlas.Host,
+		url.QueryEscape(Conf.Atlas.Database),
+	)
 }
 
 func loadMongoDB(ctx context.Context) *mongo.Database {
@@ -33,8 +28,9 @@ func loadMongoDB(ctx context.Context) *mongo.Database {
 
 	ctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
 	defer cancel()
-	opts := options.Client()
-	opts.ApplyURI(connectionString)
+	opts := options.Client().
+		ApplyURI(connectionString).
+		SetServerAPIOptions(options.ServerAPI(options.ServerAPIVersion1))
 
 	client, err := mongo.Connect(ctx, opts)
 	if err != nil {
@@ -43,15 +39,13 @@ func loadMongoDB(ctx context.Context) *mongo.Database {
 		os.Exit(-1)
 	}
 
-	err = client.Ping(ctx, nil)
-	if err != nil {
-		slog.Error("unable to ping mongo db client",
+	if err := client.Database("admin").RunCommand(context.TODO(), bson.D{{"ping", 1}}).Err(); err != nil {
+		slog.Error("unable to ping the deployment",
 			slog.Any("err", err.Error()))
 		os.Exit(-1)
 	}
+	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
 
-	slog.Info("successfully connected to mongodb",
-		"mongodb", Conf.MongoDB.Database)
-
-	return client.Database(Conf.MongoDB.Database)
+	slog.Info("mongo db client connected successfully to atlas", slog.Any("db", Conf.Atlas.Database))
+	return client.Database(Conf.Atlas.Database)
 }

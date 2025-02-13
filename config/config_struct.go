@@ -3,6 +3,7 @@ package config
 import (
 	"cloud.google.com/go/firestore"
 	"firebase.google.com/go/auth"
+	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -10,7 +11,8 @@ type Config struct {
 	App            App            `mapstructure:"app"`
 	Server         Server         `mapstructure:"server"`
 	ServiceAccount ServiceAccount `mapstructure:"serviceAccount"`
-	MongoDB        MongoDB        `mapstructure:"mongodb"`
+	Atlas          Atlas          `mapstructure:"atlas"`
+	Redis          Redis          `mapstructure:"redis"`
 }
 
 type App struct {
@@ -31,6 +33,19 @@ type MongoDB struct {
 	Database string `mapstructure:"database"`
 }
 
+type Atlas struct {
+	Host     string `mapstructure:"host"`
+	Database string `mapstructure:"database"`
+	User     string `mapstructure:"username"`
+	Password string `mapstructure:"password"`
+}
+
+type Redis struct {
+	Host string `mapstructure:"host"`
+	User string `mapstructure:"username"`
+	Pass string `mapstructure:"password"`
+}
+
 type ServiceAccount struct {
 	Path string `mapstructure:"path"`
 }
@@ -39,4 +54,5 @@ type Clients struct {
 	MongoDB      *mongo.Database
 	Firestore    *firestore.Client
 	FirebaseAuth *auth.Client
+	Redis        redis.UniversalClient
 }

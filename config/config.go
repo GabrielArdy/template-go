@@ -37,9 +37,8 @@ func Load(ctx context.Context) {
 	loadTimezone()
 	loadConfigFile()
 	Cli = Clients{
-		MongoDB:      loadMongoDB(ctx),
-		Firestore:    LoadFirestore(ctx, FirebaseApp),
-		FirebaseAuth: LoadFirebaseAuth(ctx, FirebaseApp),
+		MongoDB: loadMongoDB(ctx),
+		Redis:   loadRedisClient(ctx),
 	}
 }
 

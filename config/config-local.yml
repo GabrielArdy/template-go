@@ -10,5 +10,14 @@ mongodb:
     database: DataCrawler
     username: root
     password: rootpassword
+redis:
+    host: memcached-12444.c334.asia-southeast2-1.gce.redns.redis-cloud.com:12444
+    user: default
+    password: ''
 serviceAccount:
     path: ./resources/go-absen-backend-firebase-adminsdk-fbsvc-8665bd3219.json
+atlas:
+    host: testing.m5xqkwy.mongodb.net
+    database: db_absensi
+    username: absenadmin
+    password: 4b5eNadmin

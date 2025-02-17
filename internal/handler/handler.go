@@ -88,3 +88,55 @@ func (h *Handler) GetApiAuthValidateId(ctx echo.Context, id string) error {
 	return ctx.JSON(http.StatusOK, "User validated successfully")
 
 }
+
+func (h *Handler) PostApiAttendanceCheckin(ctx echo.Context) error {
+	var req generated.CheckinRequest
+	if err := ctx.Bind(&req); err != nil {
+		slog.Error("Attendance Handler ::: failed to bind request", slog.Any("error", err))
+		ctx.JSON(http.StatusBadRequest, generated.Error{
+			Message: "Invalid request",
+			Fields:  "PostApiAttendanceCheckin",
+			Code:    http.StatusBadRequest,
+		})
+		return err
+	}
+
+	err := h.as.RecordCheckIn(ctx.Request().Context(), req)
+	if err != nil {
+		slog.Error("Attendance Handler ::: failed to record check-in", slog.Any("error", err))
+		ctx.JSON(http.StatusInternalServerError, generated.Error{
+			Message: "Internal server error",
+			Fields:  "PostApiAttendanceCheckin",
+			Code:    http.StatusInternalServerError,
+		})
+		return err
+	}
+
+	return ctx.JSON(http.StatusOK, "Check-in recorded successfully")
+}
+
+func (h *Handler) PostApiAttendanceCheckout(ctx echo.Context) error {
+	var req generated.CheckoutRequest
+	if err := ctx.Bind(&req); err != nil {
+		slog.Error("Attendance Handler ::: failed to bind request", slog.Any("error", err))
+		ctx.JSON(http.StatusBadRequest, generated.Error{
+			Message: "Invalid request",
+			Fields:  "PostApiAttendanceCheckout",
+			Code:    http.StatusBadRequest,
+		})
+		return err
+	}
+
+	err := h.as.RecordCheckOut(ctx.Request().Context(), req)
+	if err != nil {
+		slog.Error("Attendance Handler ::: failed to record check-out", slog.Any("error", err))
+		ctx.JSON(http.StatusInternalServerError, generated.Error{
+			Message: "Internal server error",
+			Fields:  "PostApiAttendanceCheckout",
+			Code:    http.StatusInternalServerError,
+		})
+		return err
+	}
+
+	return ctx.JSON(http.StatusOK, "Check-out recorded successfully")
+}

@@ -25,8 +25,10 @@ func main() {
 	ur := repository.NewUserRepository(config.Cli.MongoDB, "users")
 	lr := repository.NewActivityRepository(config.Cli.MongoDB, "activity_logs")
 	ls := services.NewLoggingService(lr)
+	atr := repository.NewAttendanceRepository(config.Cli.MongoDB, "attendance_logs")
+	ats := services.NewAttendanceService(atr, ls, config.Cli.Redis)
 	uas := services.NewUserAuthService(ur, ar, ls, config.Cli.Redis)
-	var server generated.ServerInterface = handler.NewHandler(uas)
+	var server generated.ServerInterface = handler.NewHandler(uas, ats)
 	generated.RegisterHandlers(e, server)
 
 	go func() {

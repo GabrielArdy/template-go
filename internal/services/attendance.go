@@ -15,7 +15,7 @@ type AttendanceRepository interface {
 	GetAttendanceDocs(ctx context.Context, teacherID string) (repository.AttendanceDocs, error)
 	GetAllAttendanceDocs(ctx context.Context) ([]repository.AttendanceDocs, error)
 	UpdateAttendanceDocs(ctx context.Context, teacherID string, attendance repository.AttendanceDocs) error
-	GetAttendanceDocsByDateRange(ctx context.Context, start, end string) ([]repository.AttendanceDocs, error)
+	GetAttendanceDocsByDateRange(ctx context.Context, teacherId, start, end string) ([]repository.AttendanceDocs, error)
 }
 
 type AttendanceService struct {

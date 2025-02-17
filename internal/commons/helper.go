@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"go-scratch/internal/commons"
 	"os"
 	"path/filepath"
 	"time"
@@ -46,7 +45,7 @@ func GenerateQRCode(text string) (string, error) {
 }
 
 func VerifyQRCode(ctx context.Context, key string, c redis.UniversalClient) (bool, error) {
-	redisKey := fmt.Sprintf("%s%s", commons.QR_KEY, key)
+	redisKey := fmt.Sprintf("%s%s", QR_KEY, key)
 	res, err := c.Get(ctx, redisKey).Result()
 	if err != nil {
 		return false, fmt.Errorf("failed to check key existence: %w", err)

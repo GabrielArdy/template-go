@@ -11,4 +11,5 @@ var (
 	ErrBadParamInput       = errors.New("Given Param is not valid")
 	ErrCannotBeDeleted     = errors.New("This Item can't be deleted")
 	ErrInvalidCredentials  = errors.New("Invalid Credentials")
+	ErrInvalidTeacherID    = errors.New("Invalid Teacher ID")
 )

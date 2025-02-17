@@ -1,9 +1,13 @@
 package config
 
 import (
+	"context"
+	"go-scratch/internal/commons"
+	"log/slog"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/redis/go-redis/v9"
 )
 
 const SECRET_KEY = "y0ur53cr3tk3y"
@@ -64,4 +68,18 @@ func GetRole(tokenString string) (string, error) {
 		return "", err
 	}
 	return claims.Role, nil
+}
+
+func ValidateTokenRedis(ctx context.Context, teacherId string, c redis.UniversalClient) (bool, error) {
+	token, err := c.Get(ctx, commons.REDIS_KEY+teacherId).Result()
+	if err != nil {
+		slog.Error("ValidateTokenRedis", slog.Any("error", err))
+		return false, err
+	}
+
+	if token == "" {
+		return false, nil
+	}
+
+	return ValidateToken(token)
 }

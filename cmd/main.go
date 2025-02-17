@@ -23,7 +23,9 @@ func main() {
 
 	ar := repository.NewAuthRepository(config.Cli.MongoDB, "auth")
 	ur := repository.NewUserRepository(config.Cli.MongoDB, "users")
-	uas := services.NewUserAuthService(ur, ar, config.Cli.Redis)
+	lr := repository.NewActivityRepository(config.Cli.MongoDB, "activity_logs")
+	ls := services.NewLoggingService(lr)
+	uas := services.NewUserAuthService(ur, ar, ls, config.Cli.Redis)
 	var server generated.ServerInterface = handler.NewHandler(uas)
 	generated.RegisterHandlers(e, server)
 

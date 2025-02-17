@@ -11,9 +11,8 @@ mongodb:
     username: root
     password: rootpassword
 redis:
-    host: memcached-12444.c334.asia-southeast2-1.gce.redns.redis-cloud.com:12444
+    host: "localhost:6379"
     user: default
-    password: ''
 serviceAccount:
     path: ./resources/go-absen-backend-firebase-adminsdk-fbsvc-8665bd3219.json
 atlas:

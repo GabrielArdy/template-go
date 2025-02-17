@@ -42,8 +42,7 @@ type Atlas struct {
 
 type Redis struct {
 	Host string `mapstructure:"host"`
-	User string `mapstructure:"username"`
-	Pass string `mapstructure:"password"`
+	User string `mapstructure:"user"`
 }
 
 type ServiceAccount struct {

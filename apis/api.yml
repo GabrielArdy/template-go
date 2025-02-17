@@ -84,7 +84,91 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+  /api/auth/validate/{id}:
+    get:
+      summary: Validate a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: User ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/attendance/checkin:
+    post:
+      summary: Record check-in time
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckinRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttendanceResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/attendance/checkout:
+    post:
+      summary: Record check-out time
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckoutRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
     UserSignup:
@@ -154,6 +238,95 @@ components:
       required:
         - token
         - teacherId
+    UserValidate:
+      type: object
+      properties:
+        id:
+          type: string
+          description: User ID
+        status:
+          type: boolean
+          description: Status
+          example: true
+      required:
+        - id
+        - status
+    CheckinRequest:
+      type: object
+      properties:
+        teacherId:
+          type: string
+          description: Teacher ID
+        checkin:
+          type: string
+          format: date-time
+          description: Check-in time
+        QRToken:
+          type: string
+          description: QR Token
+      required:
+        - teacherId
+        - checkin
+        - QRToken
+    AttendanceResponse:
+      type: object
+      properties:
+        teacherId:
+          type: string
+          description: Teacher ID
+        checkin:
+          type: string
+          format: date-time
+          description: Check-in time
+        checkout:
+          type: string
+          format: date-time
+          description: Check-out time
+        Message:
+          type: string
+          description: QR Token
+      required:
+        - teacherId
+        - checkin
+        - Message
+    CheckoutRequest:
+      type: object
+      properties:
+        teacherId:
+          type: string
+          description: Teacher ID
+        checkout:
+          type: string
+          format: date-time
+          description: Check-out time
+        QRToken:
+          type: string
+          description: QR Token
+      required:
+        - teacherId
+        - checkout
+        - QRToken
+    CheckoutResponse:
+      type: object
+      properties:
+        teacherId:
+          type: string
+          description: Teacher ID
+        checkin:
+          type: string
+          format: date-time
+          description: Check-in time
+        checkout:
+          type: string
+          format: date-time
+          description: Check-out time
+        Message:
+          type: string
+          description: QR Token
+      required:
+        - teacherId
+        - checkout
+        - Message
     Error:
       type: object
       properties:

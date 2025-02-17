@@ -31,13 +31,15 @@ type AuthRepository interface {
 type UserAuthService struct {
 	UserRepository UserRepository
 	AuthRepository AuthRepository
+	Logging        *LoggingService
 	Cache          redis.UniversalClient
 }
 
-func NewUserAuthService(ur UserRepository, ar AuthRepository, c redis.UniversalClient) *UserAuthService {
+func NewUserAuthService(ur UserRepository, ar AuthRepository, lr *LoggingService, c redis.UniversalClient) *UserAuthService {
 	return &UserAuthService{
 		UserRepository: ur,
 		AuthRepository: ar,
+		Logging:        lr,
 		Cache:          c,
 	}
 }
@@ -127,6 +129,11 @@ func (ua *UserAuthService) LoginUser(ctx context.Context, req generated.UserLogi
 		return generated.UserLoginResponse{}, err
 	}
 
+	err = ua.Logging.LogActivity(ctx, authDoc.TeacherID, commons.ACTIVITY_LOGIN)
+	if err != nil {
+		slog.Error("UserAuthService :: LoginUser", slog.Any("error", err))
+	}
+
 	return generated.UserLoginResponse{
 		Token:     token,
 		TeacherId: authDoc.TeacherID,
@@ -141,4 +148,14 @@ func (ua *UserAuthService) LogoutUser(ctx context.Context, teacherID string) err
 	}
 
 	return nil
+}
+
+func (ua *UserAuthService) ValidateUser(ctx context.Context, teacherId string) (bool, error) {
+	token, err := ua.Cache.Get(ctx, commons.REDIS_KEY+teacherId).Result()
+	if err != nil {
+		slog.Error("UserAuthService :: ValidateUser", slog.Any("error", err))
+		return false, err
+	}
+
+	return config.ValidateToken(token)
 }

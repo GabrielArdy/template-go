@@ -8,14 +8,71 @@ import (
 	"compress/gzip"
 	"encoding/base64"
 	"fmt"
+	"net/http"
 	"net/url"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/labstack/echo/v4"
+	"github.com/oapi-codegen/runtime"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
+
+// AttendanceResponse defines model for AttendanceResponse.
+type AttendanceResponse struct {
+	// Message QR Token
+	Message string `json:"Message"`
+
+	// Checkin Check-in time
+	Checkin time.Time `json:"checkin"`
+
+	// Checkout Check-out time
+	Checkout *time.Time `json:"checkout,omitempty"`
+
+	// TeacherId Teacher ID
+	TeacherId string `json:"teacherId"`
+}
+
+// CheckinRequest defines model for CheckinRequest.
+type CheckinRequest struct {
+	// QRToken QR Token
+	QRToken string `json:"QRToken"`
+
+	// Checkin Check-in time
+	Checkin time.Time `json:"checkin"`
+
+	// TeacherId Teacher ID
+	TeacherId string `json:"teacherId"`
+}
+
+// CheckoutRequest defines model for CheckoutRequest.
+type CheckoutRequest struct {
+	// QRToken QR Token
+	QRToken string `json:"QRToken"`
+
+	// Checkout Check-out time
+	Checkout time.Time `json:"checkout"`
+
+	// TeacherId Teacher ID
+	TeacherId string `json:"teacherId"`
+}
+
+// CheckoutResponse defines model for CheckoutResponse.
+type CheckoutResponse struct {
+	// Message QR Token
+	Message string `json:"Message"`
+
+	// Checkin Check-in time
+	Checkin *time.Time `json:"checkin,omitempty"`
+
+	// Checkout Check-out time
+	Checkout time.Time `json:"checkout"`
+
+	// TeacherId Teacher ID
+	TeacherId string `json:"teacherId"`
+}
 
 // Error defines model for Error.
 type Error struct {
@@ -86,6 +143,12 @@ type UserSignup struct {
 	TeacherId string `json:"teacherId"`
 }
 
+// PostApiAttendanceCheckinJSONRequestBody defines body for PostApiAttendanceCheckin for application/json ContentType.
+type PostApiAttendanceCheckinJSONRequestBody = CheckinRequest
+
+// PostApiAttendanceCheckoutJSONRequestBody defines body for PostApiAttendanceCheckout for application/json ContentType.
+type PostApiAttendanceCheckoutJSONRequestBody = CheckoutRequest
+
 // PostApiAuthLoginJSONRequestBody defines body for PostApiAuthLogin for application/json ContentType.
 type PostApiAuthLoginJSONRequestBody = UserLoginRequest
 
@@ -97,12 +160,21 @@ type ServerInterface interface {
 	// Health check
 	// (GET /api/actuator/health)
 	GetApiActuatorHealth(ctx echo.Context) error
+	// Record check-in time
+	// (POST /api/attendance/checkin)
+	PostApiAttendanceCheckin(ctx echo.Context) error
+	// Record check-out time
+	// (POST /api/attendance/checkout)
+	PostApiAttendanceCheckout(ctx echo.Context) error
 	// Login a user
 	// (POST /api/auth/login)
 	PostApiAuthLogin(ctx echo.Context) error
 	// Register a new user
 	// (POST /api/auth/register)
 	PostApiAuthRegister(ctx echo.Context) error
+	// Validate a user
+	// (GET /api/auth/validate/{id})
+	GetApiAuthValidateId(ctx echo.Context, id string) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -116,6 +188,24 @@ func (w *ServerInterfaceWrapper) GetApiActuatorHealth(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.GetApiActuatorHealth(ctx)
+	return err
+}
+
+// PostApiAttendanceCheckin converts echo context to params.
+func (w *ServerInterfaceWrapper) PostApiAttendanceCheckin(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostApiAttendanceCheckin(ctx)
+	return err
+}
+
+// PostApiAttendanceCheckout converts echo context to params.
+func (w *ServerInterfaceWrapper) PostApiAttendanceCheckout(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostApiAttendanceCheckout(ctx)
 	return err
 }
 
@@ -134,6 +224,22 @@ func (w *ServerInterfaceWrapper) PostApiAuthRegister(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.PostApiAuthRegister(ctx)
+	return err
+}
+
+// GetApiAuthValidateId converts echo context to params.
+func (w *ServerInterfaceWrapper) GetApiAuthValidateId(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetApiAuthValidateId(ctx, id)
 	return err
 }
 
@@ -166,30 +272,37 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	}
 
 	router.GET(baseURL+"/api/actuator/health", wrapper.GetApiActuatorHealth)
+	router.POST(baseURL+"/api/attendance/checkin", wrapper.PostApiAttendanceCheckin)
+	router.POST(baseURL+"/api/attendance/checkout", wrapper.PostApiAttendanceCheckout)
 	router.POST(baseURL+"/api/auth/login", wrapper.PostApiAuthLogin)
 	router.POST(baseURL+"/api/auth/register", wrapper.PostApiAuthRegister)
+	router.GET(baseURL+"/api/auth/validate/:id", wrapper.GetApiAuthValidateId)
 
 }
 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

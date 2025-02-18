@@ -1,4 +1,4 @@
-.PHONY: generate build init clean build-all build-linux build-windows build-mac
+.PHONY: generate build init clean build-all build-linux build-windows build-mac deploy
 
 # Build configuration
 BINARY_NAME=go-scratch
@@ -58,3 +58,11 @@ build-all: build-linux build-windows build-mac
 clean:
 	@echo "Cleaning build directory..."
 	rm -rf $(BINARY_DIR)
+
+deploy:
+	@echo "Deploying to server..."
+	gcloud run deploy go-absensi-backend \
+	--source . \
+	--platform managed \
+	--region asia-southeast2 \
+	--allow-unauthenticated

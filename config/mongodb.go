@@ -40,7 +40,7 @@ func loadMongoDB(ctx context.Context) *mongo.Database {
 	}
 
 	if err := client.Database("admin").RunCommand(context.TODO(), bson.D{{"ping", 1}}).Err(); err != nil {
-		slog.Error("unable to ping the deployment",
+		slog.Error("unable to ping the deployment MongoDB",
 			slog.Any("err", err.Error()))
 		os.Exit(-1)
 	}

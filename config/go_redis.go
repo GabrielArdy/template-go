@@ -16,7 +16,7 @@ func loadRedisClient(ctx context.Context) *redis.Client {
 	})
 	_, err := clients.Ping(ctx).Result()
 	if err != nil {
-		slog.Error("unable to ping the deployment",
+		slog.Error("unable to ping the deployment Redis",
 			slog.Any("err", err.Error()))
 		os.Exit(-1)
 	}

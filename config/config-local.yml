@@ -3,7 +3,7 @@ app:
   version: '1.0.0'
   description: 'A simple data crawler API'
 server:
-  port: 8181
+  port: 8080
 mongodb:
     host: localhost
     port: 27017

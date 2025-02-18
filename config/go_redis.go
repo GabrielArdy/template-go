@@ -9,7 +9,11 @@ import (
 )
 
 func loadRedisClient(ctx context.Context) *redis.Client {
-	clients := redis.NewClient(&redis.Options{})
+	clients := redis.NewClient(&redis.Options{
+		Addr:     Conf.Redis.Host,
+		Password: "",
+		DB:       0,
+	})
 	_, err := clients.Ping(ctx).Result()
 	if err != nil {
 		slog.Error("unable to ping the deployment",

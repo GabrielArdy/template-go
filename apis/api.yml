@@ -141,6 +141,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /api/job/generate:
+    get:
+      summary: Generate a new job
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /api/attendance/checkout:
     post:
       summary: Record check-out time

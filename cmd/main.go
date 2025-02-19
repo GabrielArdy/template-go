@@ -28,7 +28,8 @@ func main() {
 	atr := repository.NewAttendanceRepository(config.Cli.MongoDB, "attendance_logs")
 	ats := services.NewAttendanceService(atr, ls, config.Cli.Redis)
 	uas := services.NewUserAuthService(ur, ar, ls, config.Cli.Redis)
-	var server generated.ServerInterface = handler.NewHandler(uas, ats)
+	js := services.NewJobService(atr, ur, ls)
+	var server generated.ServerInterface = handler.NewHandler(uas, ats, js)
 	generated.RegisterHandlers(e, server)
 
 	go func() {

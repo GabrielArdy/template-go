@@ -140,3 +140,18 @@ func (h *Handler) PostApiAttendanceCheckout(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, "Check-out recorded successfully")
 }
+
+func (h *Handler) GetApiJobGenerate(ctx echo.Context) error {
+	slog.Info("Job Handler ::: generating attendance docs")
+	err := h.js.GenerateAttendanceDocs(ctx.Request().Context())
+	if err != nil {
+		slog.Error("Job Handler ::: failed to generate attendance docs", slog.Any("error", err))
+		ctx.JSON(http.StatusInternalServerError, generated.Error{
+			Message: "Internal server error",
+			Fields:  "GetApiJobGenerate",
+			Code:    http.StatusInternalServerError,
+		})
+	}
+	slog.Info("Job Handler ::: attendance docs generated successfully")
+	return ctx.JSON(http.StatusOK, "Attendance docs generated successfully")
+}

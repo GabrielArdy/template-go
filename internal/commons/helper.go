@@ -5,8 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"os"
-	"path/filepath"
+	"math/rand"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -14,6 +13,9 @@ import (
 )
 
 var location *time.Location
+
+var char = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+var sym = "!@#$%^&*()_+"
 
 func GenerateCustomUID() string {
 	currentTime := time.Now()
@@ -74,19 +76,12 @@ func VerifyQRCode(ctx context.Context, key string, c redis.UniversalClient) (boo
 
 }
 
-// SaveQRCodeToFile generates a QR code and saves it to a file
-func SaveQRCodeToFile(text, outputPath string) error {
-	// Ensure directory exists
-	dir := filepath.Dir(outputPath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return fmt.Errorf("failed to create directory: %w", err)
+func GenerateRandomString(length int) string {
+	// use char and sym
+	chars := char + sym
+	randomString := make([]byte, length)
+	for i := range randomString {
+		randomString[i] = chars[rand.Intn(len(chars))]
 	}
-
-	// Generate and save QR code
-	err := qrcode.WriteFile(text, qrcode.Medium, 256, outputPath)
-	if err != nil {
-		return fmt.Errorf("failed to save QR code: %w", err)
-	}
-
-	return nil
+	return string(randomString)
 }

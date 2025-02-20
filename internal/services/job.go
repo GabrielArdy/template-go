@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"go-scratch/internal/commons"
 	"go-scratch/internal/repository"
 	"log/slog"
@@ -56,4 +57,28 @@ func (js *JobService) GenerateAttendanceDocs(ctx context.Context) error {
 		}
 	}
 	return nil
+}
+
+func (js *JobService) GenerateQRCode(ctx context.Context, teacherId string) (string, error) {
+	// Generate QR Code
+	qrToken := commons.GenerateRandomString(100)
+
+	// Create QR Object
+	qrObj := QRObject{
+		IssueDate: commons.GetLocalTime(),
+		IssuedBy:  "SIGAP SYSTEM",
+		QRToken:   qrToken,
+	}
+
+	stringifiedQR, err := json.Marshal(qrObj)
+	if err != nil {
+		return "", err
+	}
+
+	strQR, err := commons.GenerateQRCode(string(stringifiedQR))
+	if err != nil {
+		return "", err
+	}
+
+	return string(strQR), nil
 }
